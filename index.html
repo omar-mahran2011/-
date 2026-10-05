@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="ar" dir="rtl"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>بيتنا</title>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@500;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f2f5f7;--card:#fff;--ink:#0b2236;--mut:#44566a;--navy:#0b2236;--on:#fff;--teal:#0f6b6b;--line:#b9c6d1;--g:#0a6b34;--gb:#e1f5e9;--r:#a8231b;--rb:#fde8e6;--y:#7a4e00;--yb:#fff1c9;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0a1620;--card:#13273a;--ink:#f2f6f9;--mut:#b4c2cd;--navy:#f2f6f9;--on:#0a1620;--teal:#5fd0d0;--line:#40586f;--g:#7ee8ab;--gb:#10382a;--r:#ff9f98;--rb:#42201f;--y:#ffd873;--yb:#3d3012}}
+:root[data-theme="dark"]{--bg:#0a1620;--card:#13273a;--ink:#f2f6f9;--mut:#b4c2cd;--navy:#f2f6f9;--on:#0a1620;--teal:#5fd0d0;--line:#40586f;--g:#7ee8ab;--gb:#10382a;--r:#ff9f98;--rb:#42201f;--y:#ffd873;--yb:#3d3012}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font:500 20px/1.6 Tajawal,Tahoma,Arial,sans-serif}
+#app{max-width:560px;margin:0 auto;padding:20px 16px 110px}
+h1{font-size:30px;margin:8px 0 14px;font-weight:800}
+.c{background:var(--card);border:2px solid var(--line);border-radius:20px;padding:18px;margin:0 0 16px}
+.sm{color:var(--mut);font-size:18px}
+.big{font-size:28px;font-weight:800;line-height:1.4;margin:4px 0}
+.st{border-width:4px}.st.g{background:var(--gb);border-color:var(--g);color:var(--g)}.st.r{background:var(--rb);border-color:var(--r);color:var(--r)}.st.y{background:var(--yb);border-color:var(--y);color:var(--y)}
+.st .sm{color:inherit}
+.b{display:block;width:100%;min-height:68px;margin:0 0 14px;padding:12px 16px;border:3px solid var(--navy);border-radius:18px;background:var(--navy);color:var(--on);font:800 24px Tajawal,Tahoma,sans-serif;cursor:pointer}
+.b.s{background:var(--card);color:var(--ink);border-color:var(--line);font-size:21px}
+.b.in{background:var(--g);border-color:var(--g);color:var(--bg)}.b.out{background:var(--r);border-color:var(--r);color:var(--bg)}
+.l{display:block;width:100%;min-height:56px;background:none;border:0;color:var(--teal);font:700 20px Tajawal,sans-serif;text-decoration:underline;cursor:pointer}
+label{display:block;font-weight:700;margin:12px 0 6px}
+input{width:100%;min-height:60px;padding:10px 14px;font:500 22px Tajawal,sans-serif;border:2px solid var(--line);border-radius:14px;background:var(--card);color:var(--ink)}
+#err{color:var(--r);font-weight:700;margin:10px 0;min-height:4px}
+.row{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;padding:12px 0;border-bottom:1px solid var(--line)}.row:last-child{border:0}
+.code{font:800 40px monospace;letter-spacing:4px;text-align:center;direction:ltr;margin:8px 0}
+nav{position:fixed;inset-inline:0;bottom:0;display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:8px 8px calc(8px + env(safe-area-inset-bottom,0px));background:var(--card);border-top:2px solid var(--line)}
+nav button{min-height:68px;border:2px solid transparent;border-radius:14px;background:none;color:var(--ink);font:700 18px Tajawal,sans-serif;cursor:pointer}
+nav button.on{border-color:var(--navy);background:var(--bg);font-weight:800}
+.ov{position:fixed;inset:0;background:rgba(0,0,0,.6);display:flex;align-items:center;padding:16px;z-index:9}
+.ov .c{width:100%;max-width:520px;margin:0 auto}
+.toast{position:fixed;top:calc(12px + env(safe-area-inset-top,0px));inset-inline:16px;background:var(--navy);color:var(--on);padding:14px;border-radius:14px;text-align:center;font-weight:800;z-index:10}
+.ob{text-align:center;padding-top:40px}.ob .e{font-size:90px}
+</style></head><body><div id="app"></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script>
+const O='baitna_seen',$=s=>document.querySelector(s);
+const st={view:'home',mode:'login',ob:0,modal:false,pend:null,toast:''};
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const nl=s=>s.trim().toLowerCase().replace(/\s/g,'').replace(/[٠-٩]/g,d=>'٠١٢٣٤٥٦٧٨٩'.indexOf(d));
+const stale=u=>Date.now()-u.at>8*36e5;
+const ago=t=>{const m=Math.floor((Date.now()-t)/6e4);if(m<1)return 'دلوقتي';if(m<60)return 'منذ '+m+' دقيقة';const h=Math.floor(m/60);return h<24?'منذ '+h+(h<11?' ساعات':' ساعة'):'منذ '+Math.floor(h/24)+' يوم'};
+const say=m=>{st.toast=m;R();setTimeout(()=>{st.toast='';R()},2200)};
+const er=m=>{$('#err').textContent=m};
+const badge=u=>u.s==='in'?(stale(u)?'🟡 الحالة مش مؤكدة':'🟢 جوه البيت'):'🔴 بره البيت';
+function gate(){const m=members(),f=m.filter(u=>u.s==='in'&&!stale(u)).length,o=m.filter(u=>u.s==='in'&&stale(u)).length;
+ if(f)return['g','🟢','فيه حد جوه البيت',(f===1?'شخص واحد جوه':f===2?'شخصين جوه':f+' أشخاص جوه')+'. لو خارج، مش لازم تقلق إن البيت فاضي.'];
+ if(o)return['y','🟡','الحالة مش مؤكدة','آخر تحديث من فترة. اتأكد قبل ما تمشي.'];
+ return['r','🔴','مفيش حد جوه البيت','لو إنت آخر واحد خارج، اتأكد إن البوابة اتقفلت.']}
+function auth(){
+ if(!seen){const T=[['🏠','اعرف مين جوه البيت'],['👆','حدّث حالتك لما تدخل أو تخرج'],['🚪','اعرف إمتى لازم تقفل البوابة']],t=T[st.ob];
+  return `<div class="ob"><div class="e">${t[0]}</div><h1>${t[1]}</h1><br><button class="b" data-a="next">${st.ob<2?'التالي':'ابدأ'}</button></div>`}
+ const f=(id,l,t='text')=>`<label for="${id}">${l}</label><input id="${id}" type="${t}" autocomplete="off">`;
+ if(st.mode==='create')return `<h1>بيت جديد</h1>${f('hn','اسم البيت')}${f('n','اسمك')}${f('l','رقم الموبايل أو الإيميل')}${f('p','كلمة السر','password')}<div id="err" role="alert"></div><button class="b" data-a="reg" data-k="create">أنشئ البيت</button><button class="b s" data-a="mode" data-m="login">رجوع</button>`;
+ if(st.mode==='join')return `<h1>عندي دعوة لبيت</h1>${f('cd','كود البيت')}${f('n','اسمك')}${f('l','رقم الموبايل أو الإيميل')}${f('p','كلمة السر','password')}<div id="err" role="alert"></div><button class="b" data-a="reg" data-k="join">ادخل البيت</button><button class="b s" data-a="mode" data-m="login">رجوع</button>`;
+ return `<h1>🏠 بيتنا</h1><p class="sm">اعرف مين جوه البيت</p>${f('l','رقم الموبايل أو الإيميل')}${f('p','كلمة السر','password')}<div id="err" role="alert"></div><button class="b" data-a="login">دخول</button><button class="l" data-a="forgot">نسيت كلمة السر؟</button><button class="b s" data-a="mode" data-m="create">أنشئ بيت جديد</button><button class="b s" data-a="mode" data-m="join">عندي دعوة لبيت</button>`}
+function home(){const u=me(),[k,ic,t,s]=gate(),old=u.s==='in'&&stale(u),n=u.s==='in'?'out':'in';
+ return `<h1>${esc(house().n)}</h1><div class="c st ${k}"><div class="sm">حالة البيت دلوقتي</div><div class="big">${ic} ${t}</div><div>${s}</div></div>
+<div class="c"><div class="sm">إنت دلوقتي</div><div class="big">${badge(u)}</div><div class="sm">آخر تحديث: ${ago(u.at)}</div></div>
+${old&&u.nt?`<div class="c st y"><div class="big">لسه جوه البيت؟</div><button class="b in" data-a="yes">أيوه</button><button class="b out" data-a="set" data-s="out">لأ</button></div>`:''}
+<button class="b ${n}" data-a="set" data-s="${n}">${n==='out'?'أنا بره البيت':'أنا وصلت البيت'}</button>`}
+function who(){const m=members().sort((a,b)=>a.n.localeCompare(b.n,'ar')),i=m.filter(u=>u.s==='in'&&!stale(u)),y=m.filter(u=>u.s==='in'&&stale(u)),o=m.filter(u=>u.s!=='in');
+ const row=(u,ic,t)=>`<div class="row"><b>${ic} ${esc(u.n)}${u.id===meId?' (إنت)':''}</b><span class="sm">${t}</span></div>`;
+ return `<h1>مين موجود؟</h1><div class="c"><div class="big">🟢 ${i.length} جوه البيت</div><div class="big">🔴 ${o.length} بره البيت</div></div>
+<div class="c"><div class="big">جوه البيت</div>${i.map(u=>row(u,'🟢','جوه البيت')).join('')||'<div class="sm">مفيش حد</div>'}</div>
+${y.length?`<div class="c st y"><div class="big">الحالة مش مؤكدة</div>${y.map(u=>row(u,'🟡',ago(u.at))).join('')}</div>`:''}
+<div class="c"><div class="big">بره البيت</div>${o.map(u=>row(u,'🔴','بره البيت')).join('')||'<div class="sm">مفيش حد</div>'}</div>
+<div class="c"><div class="big">آخر التغييرات</div>${house().log.slice(0,6).map(l=>`<div class="row"><span>${esc(l.x)}</span><span class="sm">${ago(l.t)}</span></div>`).join('')}</div>`}
+function acc(){const u=me();return `<h1>حسابي</h1><div class="c"><div class="big">${esc(u.n)}</div><div>${esc(house().n)}${u.admin?' · مسؤول البيت':''}</div><div class="sm">${badge(u)} · ${ago(u.at)}</div></div>
+<button class="b" data-a="refresh">تحديث حالتي</button><button class="b s" data-a="go" data-v="set">إعدادات البيت</button>`}
+function sett(){const u=me(),h=house();
+ return `<h1>إعدادات البيت</h1><button class="b s" data-a="go" data-v="acc">رجوع</button>
+<div class="c"><div class="big">اسم البيت</div>${u.admin?`<input id="hn" value="${esc(h.n)}" aria-label="اسم البيت"><br><br><button class="b s" data-a="rename">حفظ الاسم</button>`:`<div>${esc(h.n)}</div>`}</div>
+${u.admin?`<div class="c"><div class="big">دعوة حد للبيت</div><div class="sm">كود البيت</div><div class="code">${h.c}</div><button class="b" data-a="copy">نسخ الكود</button><button class="b s" data-a="share">مشاركة الكود</button></div>`:''}
+<div class="c"><div class="big">أفراد البيت</div>${members().map(m=>`<div class="row"><b>${esc(m.n)}${m.admin?' (مسؤول البيت)':''}</b></div>${u.admin&&m.id!==u.id?(st.pend===m.id?`<div class="st y c"><div>أكيد عايز تشيل ${esc(m.n)}؟</div><button class="b out" data-a="rm" data-i="${m.id}">أيوه، شيله</button><button class="b s" data-a="pend" data-i="">لأ</button></div>`:`<button class="b s" data-a="pend" data-i="${m.id}">شيل ${esc(m.n)}</button><button class="b s" data-a="boss" data-i="${m.id}">خلّي ${esc(m.n)} مسؤول البيت</button>`):''}`).join('')}</div>
+<div class="c"><div class="big">إعدادات التنبيهات</div><button class="b s" data-a="nt">${u.nt?'التنبيهات شغالة (اضغط للإيقاف)':'التنبيهات موقوفة (اضغط للتشغيل)'}</button></div>
+<button class="b out" data-a="logout">تسجيل الخروج</button>`}
+const nav=()=>`<nav>${[['home','🏠','الرئيسية'],['who','👥','مين موجود؟'],['acc','⚙️','حسابي']].map(([v,i,t])=>`<button data-a="go" data-v="${v}" class="${st.view===v||(v==='acc'&&st.view==='set')?'on':''}">${i}<br>${t}</button>`).join('')}</nav>`;
+const modal=()=>`<div class="ov"><div class="c st y"><div class="big">إنت آخر واحد معروف إنه جوه البيت.</div><div>لو هتخرج، اتأكد إن البوابة اتقفلت.</div><br><button class="b" data-a="out2">تمام، هقفلها</button><button class="b s" data-a="cancel">لسه فيه حد جوه</button></div></div>`;
+function R(){let h;if(!meId||!me()){h=auth()}else{h=({home,who,acc,set:sett})[st.view]()+nav()+(st.modal?modal():'')}
+ $('#app').innerHTML=h+(st.toast?`<div class="toast" role="status">${st.toast}</div>`:'')}
+
+const SB_URL='https://jxkppzwutdjwvqmwyojq.supabase.co',SB_KEY='sb_publishable_w7EjnfRu9cmRq4AOBkYsrQ_EQjENe_m';
+const sb=supabase.createClient(SB_URL,SB_KEY);
+let meId=null,CUR=null,HS=null,MS=[],seen=false;try{seen=!!localStorage.getItem(O)}catch(e){}
+const me=()=>CUR,house=()=>HS,members=()=>MS;
+const em=l=>{l=nl(l);return l.includes('@')?l:'p'+l.replace(/\D/g,'')+'@baitna.app'};
+async function load(){try{const{data:{session}}=await sb.auth.getSession();if(!session){meId=null;CUR=null;HS=null;MS=[];return}meId=session.user.id;
+const[m,h,a]=await Promise.all([sb.from('members').select('*'),sb.from('houses').select('*').limit(1),sb.from('activity').select('*').order('created_at',{ascending:false}).limit(6)]);
+MS=(m.data||[]).map(r=>({id:r.user_id,n:r.name,admin:r.is_admin,s:r.status,at:Date.parse(r.updated_at),nt:r.notify}));
+CUR=MS.find(x=>x.id===meId)||null;const x=(h.data||[])[0];HS=x&&CUR?{n:x.name,c:x.code,log:(a.data||[]).map(l=>({t:Date.parse(l.created_at),x:l.text}))}:null}catch(e){}}
+const run=async(f,a,m)=>{try{const{error}=await sb.rpc(f,a);if(error)throw error;await load();R();if(m)say(m)}catch(e){say('حصلت مشكلة، جرّب تاني')}};
+const A={
+ next(){if(st.ob<2)st.ob++;else{seen=true;try{localStorage.setItem(O,1)}catch(e){}}R()},
+ mode(b){st.mode=b.dataset.m;R()},
+ forgot(){er('كلّم مسؤول البيت، وهو يشيلك ويبعتلك كود دعوة جديد.')},
+ async login(){er('ثواني...');const{error}=await sb.auth.signInWithPassword({email:em($('#l').value),password:$('#p').value});
+  if(error)return er('رقم الموبايل أو كلمة السر مش صح');await load();
+  if(!CUR){await sb.auth.signOut();return er('الحساب ده مش جوه أي بيت. اختار "عندي دعوة لبيت"')}st.view='home';R()},
+ async reg(b){const c=b.dataset.k==='create',n=$('#n').value.trim(),l=$('#l').value,p=$('#p').value,e=em(l),hn=c?$('#hn').value.trim():'',cd=c?'':$('#cd').value.trim();
+  if(c&&!hn)return er('اكتب اسم البيت');if(!c&&!cd)return er('اكتب كود البيت');
+  if(!n||!nl(l)||!p)return er('اكتب كل البيانات');if(p.length<6)return er('كلمة السر لازم تكون 6 حروف أو أرقام على الأقل');
+  er('ثواني...');
+  try{const r=await fetch(SB_URL+'/functions/v1/signup',{method:'POST',headers:{'Content-Type':'application/json',apikey:SB_KEY},body:JSON.stringify({email:e,password:p})}),j=await r.json();
+   if(!r.ok&&j.error!=='exists')return er(j.error==='bad_login'?'رقم الموبايل أو الإيميل مش مظبوط':'حصلت مشكلة، جرّب تاني');
+   const{error}=await sb.auth.signInWithPassword({email:e,password:p});if(error)return er('الرقم ده متسجل قبل كده بكلمة سر تانية');
+   await load();if(CUR){await sb.auth.signOut();meId=null;CUR=null;return er('الحساب ده جوه بيت بالفعل. اضغط رجوع وادخل بيه')}
+   const{error:x}=await sb.rpc(c?'create_house':'join_house',c?{h_name:hn,m_name:n}:{p_code:cd,m_name:n});
+   if(x){await sb.auth.signOut();meId=null;return er(/bad_code/.test(x.message)?'الكود ده مش صح، اتأكد منه':'حصلت مشكلة، جرّب تاني')}
+   await load();st.view='home';R()}catch(_){er('مفيش نت، جرّب تاني')}},
+ go(b){st.view=b.dataset.v;st.pend=null;R();scrollTo(0,0)},
+ set(b){const s=b.dataset.s;if(s==='out'&&!MS.some(x=>x.id!==meId&&x.s==='in'&&!stale(x))){st.modal=true;return R()}run('set_status',{p_status:s})},
+ out2(){st.modal=false;run('set_status',{p_status:'out'})},cancel(){st.modal=false;R()},
+ yes(){run('set_status',{p_status:CUR.s,p_log:false})},
+ refresh(){run('refresh_status',{},'تمام، اتحدّثت حالتك')},
+ rename(){const v=$('#hn').value.trim();if(!v)return say('اكتب اسم البيت');run('rename_house',{n:v},'اتحفظ الاسم')},
+ async copy(){try{await navigator.clipboard.writeText(HS.c);say('اتنسخ الكود')}catch(e){say('الكود: '+HS.c)}},
+ async share(){const t='انضم لبيتنا على تطبيق "بيتنا". كود البيت: '+HS.c;try{await navigator.share({text:t})}catch(e){try{await navigator.clipboard.writeText(t);say('اتنسخت رسالة الدعوة')}catch(_){say('الكود: '+HS.c)}}},
+ pend(b){st.pend=b.dataset.i||null;R()},
+ rm(b){st.pend=null;run('remove_member',{p_user:b.dataset.i})},
+ boss(b){run('make_admin',{p_user:b.dataset.i})},
+ nt(){const v=!CUR.nt;run('set_notify',{b:v});if(v&&window.Notification&&Notification.permission==='default')try{Notification.requestPermission()}catch(e){}},
+ async logout(){await sb.auth.signOut();meId=null;CUR=null;HS=null;MS=[];st.mode='login';st.view='home';R()}};
+document.addEventListener('click',e=>{const b=e.target.closest('[data-a]');if(b&&A[b.dataset.a])A[b.dataset.a](b)});
+const idle=()=>!st.modal&&!document.activeElement?.matches('input');
+const sync=async()=>{if(!meId)return;await load();if(idle())R()};
+sb.channel('b').on('postgres_changes',{event:'*',schema:'public'},sync).subscribe();
+setInterval(()=>{sync();const u=CUR;if(u&&u.nt&&u.s==='in'&&stale(u)&&document.hidden&&window.Notification&&Notification.permission==='granted'&&Date.now()-(window._ln||0)>6*36e5){window._ln=Date.now();try{new Notification('بيتنا',{body:'لسه جوه البيت؟ حدّث حالتك.'})}catch(e){}}},60000);
+addEventListener('focus',sync);
+(async()=>{await load();R()})();
+</script></body></html>
