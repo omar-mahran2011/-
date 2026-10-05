@@ -106,8 +106,8 @@ const A={
    if(!r.ok&&j.error!=='exists')return er(j.error==='bad_login'?'رقم الموبايل أو الإيميل مش مظبوط':'حصلت مشكلة، جرّب تاني');
    const{error}=await sb.auth.signInWithPassword({email:e,password:p});if(error)return er('الرقم ده متسجل قبل كده بكلمة سر تانية');
    await load();if(CUR){await sb.auth.signOut();meId=null;CUR=null;return er('الحساب ده جوه بيت بالفعل. اضغط رجوع وادخل بيه')}
-   const{error:x}=await sb.rpc(c?'create_house':'join_house',c?{h_name:hn,m_name:n}:{p_code:cd,m_name:n});
-   if(x){await sb.auth.signOut();meId=null;return er(/bad_code/.test(x.message)?'الكود ده مش صح، اتأكد منه':'حصلت مشكلة، جرّب تاني')}
+   const{data:d,error:x}=await sb.rpc(c?'create_house':'join_house',c?{h_name:hn,m_name:n}:{p_code:cd,m_name:n});
+   if(x||(!c&&d!=='ok')){await sb.auth.signOut();meId=null;return er(d==='bad_code'?'الكود ده مش صح، اتأكد منه':d==='too_many_tries'?'جرّبت كتير. استنى ساعة وجرّب تاني':'حصلت مشكلة، جرّب تاني')}
    await load();st.view='home';R()}catch(_){er('مفيش نت، جرّب تاني')}},
  go(b){st.view=b.dataset.v;st.pend=null;R();scrollTo(0,0)},
  set(b){const s=b.dataset.s;if(s==='out'&&!MS.some(x=>x.id!==meId&&x.s==='in'&&!stale(x))){st.modal=true;return R()}run('set_status',{p_status:s})},
